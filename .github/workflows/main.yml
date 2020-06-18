@@ -5,7 +5,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      
+    - name: File Existence
+      uses: andstor/file-existence-action@v1.0.1
+      id: check_files
+      with:
+        files: "Dockerfile"      
+      
     - name: Build the Docker image
+      if: steps.check_files.outputs.files_exists == 'true'
       run: docker build . --file Dockerfile --tag localbuild/testimage:latest
     - uses: anchore/scan-action@master
       with:
