@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: Container Image Scanning
 on: [push]
 jobs:
   build:
@@ -12,4 +12,3 @@ jobs:
         image-reference: "localbuild/testimage:latest"
         dockerfile-path: "Dockerfile"
         fail-build: true
-        include-app-packages: true
