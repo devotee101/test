@@ -20,3 +20,20 @@ jobs:
         image-reference: "localbuild/testimage:latest"
         dockerfile-path: "Dockerfile"
         fail-build: true
+
+  snyk:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: File Existence
+      uses: andstor/file-existence-action@v1.0.1
+      id: check_files
+      with:
+        files: "package.json"      
+      
+    - name: Run Snyk to check for vulnerabilities
+      if: steps.check_files.outputs.files_exists == 'true'
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
