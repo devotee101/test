@@ -1,24 +1,47 @@
 name: Docker Image CI
 on: [push]
 jobs:
-  build:
+  anchore:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      
+    - name: File Existence
+      uses: andstor/file-existence-action@v1.0.1
+      id: check_files
+      with:
+        files: "Dockerfile"      
+      
     - name: Build the Docker image
+      if: steps.check_files.outputs.files_exists == 'true'
       run: docker build . --file Dockerfile --tag localbuild/testimage:latest
     - uses: anchore/scan-action@master
       with:
         image-reference: "localbuild/testimage:latest"
         dockerfile-path: "Dockerfile"
         fail-build: true
-        acs-report-enable: true
-        #acs-report-severity-cutoff: "Medium"
-    - name: anchore inline scan JSON results
-      run: for j in `ls ./anchore-reports/*.json`; do echo "---- ${j} ----"; cat ${j}; echo; done
-    - name: anchore action SARIF report
-      run: cat results.sarif
-    - name: upload Anchore scan SARIF report
-      uses: github/codeql-action/upload-sarif@v1
+
+  snyk:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      
+    - name: File Existence
+      uses: andstor/file-existence-action@v1.0.1
+      id: check_files
       with:
-        sarif_file: results.sarif
+        files: "package.json"      
+      
+    - name: Run Snyk to check for vulnerabilities
+      if: steps.check_files.outputs.files_exists == 'true'
+      uses: snyk/actions/node@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  trufflehog:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: UnicornGlobal/trufflehog-actions-scan@master
+      with:
+        branch: ${{ github.head_ref }}
