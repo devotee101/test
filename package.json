@@ -16,7 +16,5 @@
     "url": "https://github.com/devotee101/test/issues"
   },
   "homepage": "https://github.com/devotee101/test#readme",
-  "dependencies": {
-    "mosc": "^1.0.0"
-  }
+  "dependencies": {}
 }
